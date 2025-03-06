@@ -6,21 +6,15 @@ from pathlib import Path
 
 lfile = Path(__file__).parent.parent/"data"
 Lpath = lfile/"laptop_prices_mod.csv"
-dfile = Path(__file__).parent.parent/"data"
-dpath = dfile/"DDoS_Dataset_with_Missing_Values.csv"
+dpath = lfile/"DDoS_Dataset_with_Missing_Values.csv"
 def load_data():
-<<<<<<< HEAD
-    labtopdata = pd.read_csv(r'paokungz/IS_Project/blob/main/data/laptop_prices_mod.csv')
-    ddos_data = pd.read_csv(r'paokungz/IS_Project/blob/main/data/DDoS_Dataset_with_Missing_Values.csv')
-=======
     labtopdata = pd.read_csv(Lpath)
     ddos_data = pd.read_csv(dpath)
->>>>>>> eed7309 (Save changes before rebase)
     return labtopdata, ddos_data
 
 labtopdata, ddos_data = load_data()
 
-def app():
+def app3():
     # แสดงข้อมูลเบื้องต้นเกี่ยวกับการจัดการข้อมูลใน laptop_prices_mod.csv
     st.write("### การจัดการข้อมูลใน laptop_prices_mod.csv:")
     

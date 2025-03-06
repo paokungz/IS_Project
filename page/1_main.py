@@ -2,7 +2,7 @@
 import streamlit as st
 from pathlib import Path
 from page1 import app1
-from page2 import app2
+from page2 import app
 from page3 import app3
 from page4 import app4
 from page5 import app5
@@ -14,7 +14,7 @@ def main():
     if page == "การเตรียมข้อมูล":
         app1()  # เรียกใช้ฟังก์ชัน app() จาก page1
     elif page == "ทฤษฎีของอัลกอริทึมที่พัฒนา":
-        app2()
+        app()
     elif page == "การจัดการข้อมูล":
         app3()
     elif page == " Random Forest และ Gradient Boosting":
