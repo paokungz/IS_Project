@@ -4,7 +4,6 @@ from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import LabelEncoder
 from tensorflow.keras.models import load_model
 from sklearn.model_selection import train_test_split
-import matplotlib.pyplot as plt
 import os
 import numpy as np
 
