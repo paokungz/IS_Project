@@ -4,8 +4,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 
 def load_data():
-    labtopdata = pd.read_csv(r'data/laptop_prices_mod.csv')
-    ddos_data = pd.read_csv(r'data/DDoS_Dataset_with_Missing_Values.csv')
+    labtopdata = pd.read_csv(r'paokungz/IS_Project/blob/main/data/laptop_prices_mod.csv.csv')
+    ddos_data = pd.read_csv(r'paokungz/IS_Project/blob/main/data/DDoS_Dataset_with_Missing_Values.csv')
     return labtopdata, ddos_data
 
 labtopdata, ddos_data = load_data()
