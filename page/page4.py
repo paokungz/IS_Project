@@ -1,157 +1,233 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
+import joblib
 from sklearn.impute import SimpleImputer
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
-from sklearn.neighbors import KNeighborsRegressor, KNeighborsClassifier
-from sklearn.tree import DecisionTreeRegressor, DecisionTreeClassifier
-from sklearn.metrics import mean_squared_error, precision_score, recall_score, f1_score, r2_score
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 
-# Function to load and preprocess data
-def load_and_preprocess_data(file_path):
-    # Load data
-    car_data = pd.read_csv(file_path)
-
-    # Handle missing values
-    imputer = SimpleImputer(strategy='mean')  # Replace missing values with mean
-    car_data[['Selling_Price', 'Present_Price', 'Kms_Driven']] = imputer.fit_transform(
-        car_data[['Selling_Price', 'Present_Price', 'Kms_Driven']]
-    )
-
-    # Label encoding for categorical columns
-    label_encoder = LabelEncoder()
-    car_data['Fuel_Type'] = label_encoder.fit_transform(car_data['Fuel_Type'])
-    car_data['Seller_Type'] = label_encoder.fit_transform(car_data['Seller_Type'])
-    car_data['Transmission'] = label_encoder.fit_transform(car_data['Transmission'])
-
-    return car_data
-
-# Function to train regression models
-def train_regression_models(car_data):
-    X = car_data.drop(columns=['Car_Name', 'Owner', 'Selling_Price'])  # Features
-    y = car_data['Selling_Price']  # Target
-
-    # Split data into train and test sets
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-    # Train KNN Regressor
-    knn = KNeighborsRegressor(n_neighbors=5)
-    knn.fit(X_train, y_train)
-    y_pred_knn = knn.predict(X_test)
-    mse_knn = mean_squared_error(y_test, y_pred_knn)
-
-    # Train Decision Tree Regressor
-    dt = DecisionTreeRegressor(random_state=42)
-    dt.fit(X_train, y_train)
-    y_pred_dt = dt.predict(X_test)
-    mse_dt = mean_squared_error(y_test, y_pred_dt)
-
-    # R² Score
-    r2_knn = r2_score(y_test, y_pred_knn)
-    r2_dt = r2_score(y_test, y_pred_dt)
-
-    return mse_knn, mse_dt, r2_knn, r2_dt, y_pred_knn, y_pred_dt, y_test, knn, dt
-
-# Function to train classification models
-def train_classification_models(car_data):
-    threshold = car_data['Selling_Price'].median()
-    car_data['Price_Category'] = (car_data['Selling_Price'] > threshold).astype(int)
-
-    X = car_data.drop(columns=['Car_Name', 'Owner', 'Selling_Price', 'Price_Category'])  # Features
-    y = car_data['Price_Category']  # Target
-
-    # Split data into train and test sets
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-    # Train KNN Classifier
-    knn = KNeighborsClassifier(n_neighbors=5)
-    knn.fit(X_train, y_train)
-    y_pred_knn = knn.predict(X_test)
-
-    # Train Decision Tree Classifier
-    dt = DecisionTreeClassifier(random_state=42)
-    dt.fit(X_train, y_train)
-    y_pred_dt = dt.predict(X_test)
-
-    # Precision, Recall, F1 Scores
-    precision_knn = precision_score(y_test, y_pred_knn)
-    recall_knn = recall_score(y_test, y_pred_knn)
-    f1_knn = f1_score(y_test, y_pred_knn)
-
-    precision_dt = precision_score(y_test, y_pred_dt)
-    recall_dt = recall_score(y_test, y_pred_dt)
-    f1_dt = f1_score(y_test, y_pred_dt)
-
-    return precision_knn, recall_knn, f1_knn, precision_dt, recall_dt, f1_dt, knn, dt
-
-# Main Streamlit app
+# ฟังก์ชันหลักของแอพ
 def app():
-    st.title("Car Price Prediction and Classification")
-
-    # Upload data file
-    file_path = st.text_input("Enter the file path for the dataset (CSV format)", r"C:\Users\s6404062620087\Desktop\IS_project\data\Car_Data_with_Missing_Values.csv")
     
-    # Load and preprocess data
-    car_data = load_and_preprocess_data(file_path)
+    # Function to load a saved model
+    def load_model(model_path):
+        return joblib.load(model_path)
 
-    # Model selection
-    model_type = st.selectbox("Select the model type", ["Regression", "Classification"])
+    # Function to predict the price using the provided model
+    def predict_price(model, input_data):
+        return model.predict(pd.DataFrame([input_data]))[0]
+    # Function to collect user input
+    def get_user_input():
 
-    # Input features for prediction
-    st.write("### Enter the car details for prediction:")
+        st.sidebar.header("กรุณากรอกข้อมูล Laptop")
 
-    # Input fields for prediction
-    fuel_type = st.selectbox("Fuel Type", ["Petrol", "Diesel", "CNG"])
-    seller_type = st.selectbox("Seller Type", ["Individual", "Dealer"])
-    transmission = st.selectbox("Transmission", ["Manual", "Automatic"])
-    present_price = st.number_input("Present Price of the car (in thousands)", min_value=0.0)
-    kms_driven = st.number_input("Kms Driven", min_value=0)
-    
-    # Features for prediction
-    features = {
-        'Fuel_Type': fuel_type,
-        'Seller_Type': seller_type,
-        'Transmission': transmission,
-        'Present_Price': present_price,
-        'Kms_Driven': kms_driven
-    }
+        # Step 1: กรอกข้อมูล RAM
+        ram = st.sidebar.number_input("RAM (GB)", min_value=1, max_value=64, value=8, help="เลือกขนาดของ RAM ที่คุณต้องการ เช่น 8GB, 16GB")
+        
+        # Step 2: กรอกข้อมูล Storage
+        storage = st.sidebar.number_input("Storage (GB)", min_value=120, max_value=2000, value=512, help="เลือกขนาดของ Storage เช่น 512GB, 1TB")
+        
+        # Step 3: กรอกข้อมูลขนาดหน้าจอ (Screen Size)
+        screen_size = st.sidebar.number_input("Screen Size (inch)", min_value=10, max_value=17, value=15, help="เลือกขนาดหน้าจอของ Laptop เช่น 15.6 นิ้ว")
+        
+        # Step 4: กรอกข้อมูล Battery Life
+        battery_life = st.sidebar.number_input("Battery Life (hours)", min_value=1, max_value=20, value=10, help="เลือกระยะเวลาใช้งานแบตเตอรี่ในชั่วโมง เช่น 10 ชั่วโมง")
+        
+        # Step 5: กรอกข้อมูลน้ำหนัก (Weight)
+        weight = st.sidebar.number_input("Weight (kg)", min_value=0.5, max_value=5.0, value=1.8, help="เลือกน้ำหนักของ Laptop เช่น 1.8 kg")
+        
+        # Step 6: เลือก GPU
+        gpu = st.sidebar.selectbox("GPU Model", ['RTX 2060', 'RTX 3060', 'RTX 3080', 'RX 6600', 'RX 6800'], help="เลือก GPU ที่มีใน Laptop")
+        
+        # Step 7: เลือก Processor
+        processor = st.sidebar.selectbox("Processor", ['AMD Ryzen 5', 'AMD Ryzen 7', 'AMD Ryzen 9', 'Intel i3', 'Intel i5', 'Intel i7', 'Intel i9'], help="เลือก Processor ที่มีใน Laptop")
+        
+        # Step 8: เลือกระบบปฏิบัติการ
+        os = st.sidebar.selectbox("Operating System", ['Linux', 'Windows', 'macOS'], help="เลือกระบบปฏิบัติการของ Laptop")
+        
+        # Step 9: เลือกประเภทของ Storage
+        storage_type = st.sidebar.selectbox("Storage Type", ['SSD'], help="เลือกประเภทของ Storage เช่น SSD")
+        
+        # Step 10: เลือกประเภทของ Resolution
+        resolution_type = st.sidebar.selectbox("Resolution Type", ['4K', 'Full HD', 'HD', 'Other'], help="เลือกประเภทของ Resolution")
+        
+        # Step 11: เลือก Brand
+        brand = st.sidebar.selectbox("Brand", ['Apple', 'Asus', 'Dell', 'HP', 'Lenovo', 'MSI', 'Microsoft', 'Razer', 'Samsung'], help="เลือก Brand ของ Laptop")
 
-    # Convert inputs to appropriate format for prediction
-    input_data = pd.DataFrame([features])
+        # One-Hot Encoding for categorical variables
+        input_data = {
+            'RAM (GB)': ram,
+            'Storage_Capacity': storage,
+            'Screen Size (inch)': screen_size,
+            'Battery Life (hours)': battery_life,
+            'Weight (kg)': weight,
+            'GPU_Model_' + gpu: 1,
+            'Processor_' + processor: 1,
+            'Operating System_' + os: 1,
+            'Storage_Type_' + storage_type: 1,
+            'Resolution_Type_' + resolution_type: 1,
+            'Brand_' + brand: 1
+        }
+        
+        # Ensure all possible columns are present, adding missing ones with 0s
+        all_columns = ['RAM (GB)', 'Storage_Capacity', 'Screen Size (inch)', 'Battery Life (hours)', 'Weight (kg)'] + \
+                       ['GPU_Model_RTX 2060', 'GPU_Model_RTX 3060', 'GPU_Model_RTX 3080', 'GPU_Model_RX 6600', 'GPU_Model_RX 6800'] + \
+                       ['Processor_AMD Ryzen 5', 'Processor_AMD Ryzen 7', 'Processor_AMD Ryzen 9', 'Processor_Intel i3', 'Processor_Intel i5', 
+                        'Processor_Intel i7', 'Processor_Intel i9'] + \
+                       ['Operating System_Linux', 'Operating System_Windows', 'Operating System_macOS'] + \
+                       ['Storage_Type_SSD'] + \
+                       ['Resolution_Type_4K', 'Resolution_Type_Full HD', 'Resolution_Type_HD', 'Resolution_Type_Other'] + \
+                       ['Brand_Apple', 'Brand_Asus', 'Brand_Dell', 'Brand_HP', 'Brand_Lenovo', 'Brand_MSI', 'Brand_Microsoft', 'Brand_Razer', 'Brand_Samsung']
+        
+        # Fill missing columns with 0
+        for col in all_columns:
+            if col not in input_data:
+                input_data[col] = 0
+        
+        return input_data
 
-    # Map categorical inputs to numeric values
-    input_data['Fuel_Type'] = input_data['Fuel_Type'].map({'Petrol': 0, 'Diesel': 1, 'CNG': 2})
-    input_data['Seller_Type'] = input_data['Seller_Type'].map({'Individual': 0, 'Dealer': 1})
-    input_data['Transmission'] = input_data['Transmission'].map({'Manual': 0, 'Automatic': 1})
+    # โหลดโมเดล RandomForest และ GradientBoosting
+    rf_model = load_model('C:/Users/s6404062620087/Desktop/IS_project/page/rf_model.pkl')
+    gb_model = load_model('C:/Users/s6404062620087/Desktop/IS_project/page/gb_model.pkl')
 
-    # Prediction and output
-    if model_type == "Regression":
-        # Train regression models
-        mse_knn, mse_dt, r2_knn, r2_dt, y_pred_knn, y_pred_dt, y_test, knn_model, dt_model = train_regression_models(car_data)
+    # แสดงเนื้อหาภายในแอพ
+    st.title("ทำนายราคา Laptop")
+    st.write("กรุณากรอกข้อมูลที่คุณต้องการทำนายราคา แล้วคลิกปุ่ม 'ทำนายราคา'")
 
-        st.write(f'KNN Mean Squared Error: {mse_knn:.2f}')
-        st.write(f'Decision Tree Mean Squared Error: {mse_dt:.2f}')
+    # รับข้อมูลจากผู้ใช้
+    input_data = get_user_input()
 
-        # Predict the selling price using trained model (KNN)
-        predicted_price_knn = knn_model.predict(input_data)
-        st.write(f"Predicted Selling Price (KNN): {predicted_price_knn[0]:.2f} thousand")
+    # ปุ่มให้ทำนายราคา
+    if st.sidebar.button('ทำนายราคา'):
+        # ทำนายราคาด้วยโมเดล Random Forest และ Gradient Boosting
+        rf_price = predict_price(rf_model, input_data)
+        gb_price = predict_price(gb_model, input_data)
+        
+        # แสดงผลลัพธ์ในขนาดใหญ่
+        st.markdown(f"<h2 style='color: blue;'>ราคาที่ทำนายจากโมเดล Random Forest: {rf_price:,.2f} THB</h2>", unsafe_allow_html=True)
+        st.markdown(f"<h2 style='color: green;'>ราคาที่ทำนายจากโมเดล Gradient Boosting: {gb_price:,.2f} THB</h2>", unsafe_allow_html=True)
 
-        # Predict the selling price using trained model (Decision Tree)
-        predicted_price_dt = dt_model.predict(input_data)
-        st.write(f"Predicted Selling Price (Decision Tree): {predicted_price_dt[0]:.2f} thousand")
+    # แสดงโค้ดให้ผู้ใช้งาน
+    st.subheader("โค้ดสำหรับแอพนี้")
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    from sklearn.model_selection import train_test_split
+    from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
+    from sklearn.metrics import mean_squared_error, r2_score
 
-    elif model_type == "Classification":
-        # Train classification models
-        precision_knn, recall_knn, f1_knn, precision_dt, recall_dt, f1_dt, knn_model, dt_model = train_classification_models(car_data)
+    # Step 1: การโหลดข้อมูล
+    st.markdown("""
+    ### Step 1: การโหลดข้อมูล
+    ในขั้นตอนแรกเราทำการโหลดข้อมูลจากไฟล์ CSV โดยใช้ `pandas.read_csv` เพื่อให้ข้อมูลพร้อมสำหรับการวิเคราะห์
+    """)
+    st.code("""
+    file_path = '/content/laptop_prices_mod.csv'  # พาธไฟล์ที่โหลดขึ้น
+    data = pd.read_csv(file_path)
+    """, language="python")
 
-        st.write(f'KNN Precision: {precision_knn:.2f}')
-        st.write(f'Decision Tree Precision: {precision_dt:.2f}')
+    # Step 2: การจัดการข้อมูล
+    st.markdown("""
+    ### Step 2: การจัดการข้อมูล
+    ในขั้นตอนนี้เราจะเติมค่าที่หายไปในคอลัมน์ตัวเลขด้วยค่ามัธยฐาน โดยใช้ `SimpleImputer` ของ `sklearn`
+    """)
+    st.code("""
+    # เติมค่าที่หายไป (Missing Values) ในคอลัมน์ตัวเลขด้วยค่ามัธยฐาน
+    imputer = SimpleImputer(strategy='median')
+    data[['RAM (GB)', 'Storage_Capacity', 'Price_THB']] = imputer.fit_transform(data[['RAM (GB)', 'Storage_Capacity', 'Price_THB']])
+    """, language="python")
 
-        # Predict price category using trained model (KNN)
-        predicted_category_knn = knn_model.predict(input_data)
-        st.write(f"Predicted Price Category (KNN): {'High' if predicted_category_knn[0] == 1 else 'Low'}")
+    # Step 3: One-Hot Encoding สำหรับคอลัมน์ที่เป็น string (Categorical Data)
+    st.markdown("""
+    ### Step 3: One-Hot Encoding สำหรับคอลัมน์ที่เป็น string (Categorical Data)
+    เนื่องจากข้อมูลที่เป็นข้อความไม่สามารถใช้ในการฝึกโมเดลได้ เราจึงต้องใช้ One-Hot Encoding เพื่อแปลงข้อมูลประเภทนี้ให้เป็นตัวเลข
+    """)
+    st.code("""
+    # One-Hot Encoding สำหรับคอลัมน์ที่เป็น string (Categorical Data)
+    data = pd.get_dummies(data, drop_first=True)
+    """, language="python")
 
-        # Predict price category using trained model (Decision Tree)
-        predicted_category_dt = dt_model.predict(input_data)
-        st.write(f"Predicted Price Category (Decision Tree): {'High' if predicted_category_dt[0] == 1 else 'Low'}")
+    # Step 4: เตรียมข้อมูลสำหรับโมเดล
+    st.markdown("""
+    ### Step 4: เตรียมข้อมูลสำหรับโมเดล
+    หลังจากที่แปลงข้อมูลแล้ว เราจะเตรียมข้อมูล (Features) และเป้าหมาย (Target) สำหรับการฝึกโมเดล โดยจะนำคอลัมน์ `Price_THB` เป็น Target
+    """)
+    st.code("""
+    X = data.drop(['Price_THB'], axis=1)  # Features
+    y = data['Price_THB']  # Target variable (Price in THB)
+    """, language="python")
+
+    # Step 5: เติมค่าที่หายไปใน Features (X)
+    st.markdown("""
+    ### Step 5: เติมค่าที่หายไปใน Features (X)
+    ในขั้นตอนนี้เราจะเติมค่าที่หายไปใน Features โดยใช้ `SimpleImputer` เพื่อลบค่าที่หายไปใน Features ทั้งหมด
+    """)
+    st.code("""
+    # เติมค่าที่หายไปใน Features (X)
+    X_imputed = imputer.fit_transform(X)  # ใช้ SimpleImputer เติมค่าที่หายไปใน Features
+    """, language="python")
+
+    # Step 6: แบ่งข้อมูลเป็น train และ test
+    st.markdown("""
+    ### Step 6: แบ่งข้อมูลเป็น train และ test
+    การแบ่งข้อมูลออกเป็นชุดฝึก (Train Set) และชุดทดสอบ (Test Set) ช่วยให้เราสามารถฝึกโมเดลและทดสอบความแม่นยำได้
+    """)
+    st.code("""
+    # แบ่งข้อมูลเป็น train และ test
+    X_train, X_test, y_train, y_test = train_test_split(X_imputed, y, test_size=0.2, random_state=42)
+    """, language="python")
+
+    # Step 7: สร้างและฝึกโมเดล Random Forest
+    st.markdown("""
+    ### Step 7: สร้างและฝึกโมเดล Random Forest
+    เราใช้ RandomForestRegressor สำหรับการฝึกโมเดลทำนายราคาลาปท็อป โดยจะใช้ข้อมูลที่แยกออกเป็นชุดฝึก
+    """)
+    st.code("""
+    # สร้างและฝึกโมเดล Random Forest
+    rf_model = RandomForestRegressor(n_estimators=100, random_state=42)
+    rf_model.fit(X_train, y_train)
+    """, language="python")
+
+    # Step 8: สร้างและฝึกโมเดล Gradient Boosting
+    st.markdown("""
+    ### Step 8: สร้างและฝึกโมเดล Gradient Boosting
+    ในขั้นตอนนี้เราจะสร้างโมเดล Gradient Boosting สำหรับทำนายราคาลาปท็อปโดยการฝึกโมเดลนี้ด้วยชุดข้อมูลที่เตรียมไว้
+    """)
+    st.code("""
+    # สร้างและฝึกโมเดล Gradient Boosting
+    gb_model = GradientBoostingRegressor(n_estimators=100, random_state=42)
+    gb_model.fit(X_train, y_train)
+    """, language="python")
+
+    # Step 9: Visualization - แสดงการทำนายของทั้งสองโมเดล
+    st.markdown("""
+    ### Step 9: Visualization - แสดงการทำนายของทั้งสองโมเดล
+    เราจะสร้างกราฟ Scatter Plot เพื่อเปรียบเทียบค่าที่ทำนายได้จากทั้งสองโมเดล (Random Forest และ Gradient Boosting)
+    """)
+    st.code("""
+    # กราฟการทำนาย Random Forest
+    plt.figure(figsize=(12, 6))
+    sns.scatterplot(x=y_test, y=y_pred_rf, color='blue', label='Random Forest')
+    plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], color='red', linestyle='--')
+    plt.xlabel('True Price')
+    plt.ylabel('Predicted Price')
+    plt.title('Random Forest: True vs Predicted Price')
+    plt.legend()
+    plt.show()
+
+    # กราฟการทำนาย Gradient Boosting
+    plt.figure(figsize=(12, 6))
+    sns.scatterplot(x=y_test, y=y_pred_gb, color='green', label='Gradient Boosting')
+    plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], color='red', linestyle='--')
+    plt.xlabel('True Price')
+    plt.ylabel('Predicted Price')
+    plt.title('Gradient Boosting: True vs Predicted Price')
+    plt.legend()
+    plt.show()
+    """, language="python")
+    st.image(r'C:\Users\s6404062620087\Desktop\IS_project\page\page4.png', caption="random forest", use_container_width=True, output_format='auto')
+    st.image(r'C:\Users\s6404062620087\Desktop\IS_project\page\page4_2.png', caption="Gradient boost", use_container_width=True, output_format='auto')
+    st.markdown("""
+    ### แสดงการทำนายของทั้งสองโมเดล
+    Random Forest Mean Squared Error: 188917136.84570354\n
+    Random Forest R²: 0.912973305902608\n
+    Gradient Boosting Mean Squared Error: 181326597.95363292\n
+    Gradient Boosting R²: 0.916469968604701
+    """)
