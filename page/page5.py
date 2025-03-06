@@ -16,9 +16,9 @@ def app():
 # - model_path: the pre-trained model file.
 # - image_path: an optional image to display in the app.
 
-    file_path = r'C:\Users\s6404062620087\Desktop\IS_project\data\DDoS_Dataset_with_Missing_Values.csv'
-    model_path = r'C:\Users\s6404062620087\Desktop\IS_project\page\model.h5'
-    image_path = r'C:\Users\s6404062620087\Desktop\IS_project\page\download.png'
+    file_path = r'data/DDoS_Dataset_with_Missing_Values.csv'
+    model_path = r'page/model.h5'
+    image_path = r'page/download.png'
 
     # Load dataset
     if not os.path.exists(file_path):

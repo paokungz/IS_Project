@@ -85,8 +85,8 @@ def app():
         return input_data
 
     # โหลดโมเดล RandomForest และ GradientBoosting
-    rf_model = load_model('C:/Users/s6404062620087/Desktop/IS_project/page/rf_model.pkl')
-    gb_model = load_model('C:/Users/s6404062620087/Desktop/IS_project/page/gb_model.pkl')
+    rf_model = load_model('page/rf_model.pkl')
+    gb_model = load_model('page/gb_model.pkl')
 
     # แสดงเนื้อหาภายในแอพ
     st.title("ทำนายราคา Laptop")
@@ -222,8 +222,8 @@ def app():
     plt.legend()
     plt.show()
     """, language="python")
-    st.image(r'C:\Users\s6404062620087\Desktop\IS_project\page\page4.png', caption="random forest", use_container_width=True, output_format='auto')
-    st.image(r'C:\Users\s6404062620087\Desktop\IS_project\page\page4_2.png', caption="Gradient boost", use_container_width=True, output_format='auto')
+    st.image(r'page/page4.png', caption="random forest", use_container_width=True, output_format='auto')
+    st.image(r'page/page4_2.png', caption="Gradient boost", use_container_width=True, output_format='auto')
     st.markdown("""
     ### แสดงการทำนายของทั้งสองโมเดล
     Random Forest Mean Squared Error: 188917136.84570354\n
