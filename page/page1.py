@@ -1,7 +1,12 @@
 import streamlit as st
 import pandas as pd
-
+import joblib
+from pathlib import Path
 def app():
+    lfile = Path(__file__).parent.parent/"data"
+    Lpath = lfile/"laptop_prices_mod.csv"
+    dfile = Path(__file__).parent.parent/"data"
+    dpath = dfile/"DDoS_Dataset_with_Missing_Values.csv"
     st.write("### ภาพรวมของโปรเจค")
     st.write("โปรเจคนี้นำเสนอ Machine Learning และ Neural Network โดยใช้ Streamlit ในการสร้าง Web Application")
     
@@ -14,7 +19,11 @@ def app():
     )
     
     st.write("### ข้อมูลตัวอย่างจาก Laptop Prices Dataset")
+<<<<<<< HEAD
     laptop_data = pd.read_csv(r"paokungz/IS_Project/blob/main/data/laptop_prices_mod.csv")
+=======
+    laptop_data = pd.read_csv(Lpath)
+>>>>>>> eed7309 (Save changes before rebase)
     st.write(laptop_data.head())
     
     # อธิบาย Feature ของ Laptop Dataset
@@ -38,7 +47,11 @@ def app():
     )
     
     st.write("### ข้อมูลตัวอย่างจาก DDoS Dataset")
+<<<<<<< HEAD
     ddos_data = pd.read_csv(r"paokungz/IS_Project/blob/main/data/DDoS_Dataset_with_Missing_Values.csv")
+=======
+    ddos_data = pd.read_csv(dpath)
+>>>>>>> eed7309 (Save changes before rebase)
     st.write(ddos_data.head())
 
     # อธิบาย Feature ของ DDoS Traffic Dataset

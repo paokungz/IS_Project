@@ -2,10 +2,20 @@ import streamlit as st
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
+from pathlib import Path
 
+lfile = Path(__file__).parent.parent/"data"
+Lpath = lfile/"laptop_prices_mod.csv"
+dfile = Path(__file__).parent.parent/"data"
+dpath = dfile/"DDoS_Dataset_with_Missing_Values.csv"
 def load_data():
+<<<<<<< HEAD
     labtopdata = pd.read_csv(r'paokungz/IS_Project/blob/main/data/laptop_prices_mod.csv')
     ddos_data = pd.read_csv(r'paokungz/IS_Project/blob/main/data/DDoS_Dataset_with_Missing_Values.csv')
+=======
+    labtopdata = pd.read_csv(Lpath)
+    ddos_data = pd.read_csv(dpath)
+>>>>>>> eed7309 (Save changes before rebase)
     return labtopdata, ddos_data
 
 labtopdata, ddos_data = load_data()

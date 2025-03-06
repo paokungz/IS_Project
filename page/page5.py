@@ -4,9 +4,14 @@ from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import LabelEncoder
 from tensorflow.keras.models import load_model
 from sklearn.model_selection import train_test_split
+from pathlib import Path
 import os
 import numpy as np
-
+rffile = Path(__file__).parent
+modelp = rffile/"model.h5"
+img = rffile/"download.png"
+dfile = Path(__file__).parent.parent/"data"
+dpath = dfile/"DDoS_Dataset_with_Missing_Values.csv"
 def app():
     # **DDoS Prediction App**
 
@@ -16,9 +21,15 @@ def app():
 # - model_path: the pre-trained model file.
 # - image_path: an optional image to display in the app.
 
+<<<<<<< HEAD
     file_path = r'paokungz/IS_Project/blob/main/data/DDoS_Dataset_with_Missing_Values.csv'
     model_path = r'paokungz/IS_Project/blob/main/page/model.h5'
     image_path = r'paokungz/IS_Project/blob/main/page/download.png'
+=======
+    file_path = dpath
+    model_path = modelp
+    image_path = img
+>>>>>>> eed7309 (Save changes before rebase)
 
     # Load dataset
     if not os.path.exists(file_path):

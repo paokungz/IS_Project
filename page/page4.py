@@ -3,7 +3,17 @@ import pandas as pd
 import joblib
 from sklearn.impute import SimpleImputer
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
+from pathlib import Path
 
+
+rffile = Path(__file__).parent
+rfpath = rffile/"rf_model.pkl"
+rffile = Path(__file__).parent
+gbpath = rffile/"gb_model.pkl"
+
+im4 = rffile/"page4.png"
+
+im42 = rffile/"page4_2.png"
 # ฟังก์ชันหลักของแอพ
 def app():
     
@@ -85,8 +95,13 @@ def app():
         return input_data
 
     # โหลดโมเดล RandomForest และ GradientBoosting
+<<<<<<< HEAD
     rf_model = load_model('paokungz/IS_Project/blob/main/page/rf_model.pkl')
     gb_model = load_model('paokungz/IS_Project/blob/main/page/gb_model.pkl')
+=======
+    rf_model = load_model(rfpath)
+    gb_model = load_model(gbpath)
+>>>>>>> eed7309 (Save changes before rebase)
 
     # แสดงเนื้อหาภายในแอพ
     st.title("ทำนายราคา Laptop")
@@ -222,8 +237,13 @@ def app():
     plt.legend()
     plt.show()
     """, language="python")
+<<<<<<< HEAD
     st.image(r'paokungz/IS_Project/blob/main/page/page4.png', caption="random forest", use_container_width=True, output_format='auto')
     st.image(r'paokungz/IS_Project/blob/main/page/page4_2.png.png', caption="Gradient boost", use_container_width=True, output_format='auto')
+=======
+    st.image(im4, caption="random forest", use_container_width=True, output_format='auto')
+    st.image(im42, caption="Gradient boost", use_container_width=True, output_format='auto')
+>>>>>>> eed7309 (Save changes before rebase)
     st.markdown("""
     ### แสดงการทำนายของทั้งสองโมเดล
     Random Forest Mean Squared Error: 188917136.84570354\n
